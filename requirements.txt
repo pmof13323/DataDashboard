@@ -1,4 +1,5 @@
 plotly
+gender-guesser
 streamlit
 pandas
 textblob
