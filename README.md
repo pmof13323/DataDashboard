@@ -9,6 +9,7 @@ As part of this project, I'm diving into Natural Language Processing (NLP) to un
 Get a grip on basic NLP concepts like text processing and tokenisation.
 Conduct sentiment analysis on song names to see what emotions are most prevalent in popular music.
 Try out text classification to group songs, potentially by genre or mood.
+Find a relationship between popularity of songs and musical characteristics.
 
 # Using NLP in the Dashboard
 In the dashboard, I'll use NLP to allow users to search and filter songs by keywords or sentiments.
