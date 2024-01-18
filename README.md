@@ -14,7 +14,7 @@ Try out text classification to group songs, potentially by genre or mood.
 In the dashboard, I'll use NLP to allow users to search and filter songs by keywords or sentiments.
 Tools
 
-The project is built with Python, using Streamlit for the dashboard. For NLP, I'm starting with NLTK and spaCy.
+The project is built with Python, using Streamlit for the dashboard.
 
 # Collaboration and Feedback
 Open to ideas, feedback, or collaboration - feel free to reach out or contribute.
