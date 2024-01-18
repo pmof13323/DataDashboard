@@ -129,3 +129,11 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+st.markdown('## Key Insights')
+st.markdown("""
+- **Song Duration**: There is a trend where the most popular tracks tend to have shorter durations. 
+- **Loudness and Danceability**: Tracks with higher loudness and danceability metrics demonstrate better performance in the top quartile of popularity. 
+- **Acousticness**: A higher degree of acousticness in the most popular songs suggests a preference for organic, natural sounds.
+- **Energy, Instrumentalness, and Liveness**: Interestingly, songs with lower energy, instrumentalness, and liveness appear to dominate the top popularity bracket. This could point towards a prevailing taste for studio-produced tracks that emphasize vocal performance over instrumental solos or live concert recordings.
+""")
