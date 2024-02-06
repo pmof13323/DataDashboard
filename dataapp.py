@@ -6,6 +6,8 @@ import plotly.graph_objs as go
 from textblob import TextBlob
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
 
 st.markdown('# Welcome to the 2020 Spotify music dashboard.')
 data_url = "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv"
@@ -19,6 +21,8 @@ df = pd.read_csv('spotify_songs.csv')  # make sure the file is in the same direc
 columnsExtract = ['track_name', 'track_artist', 'track_popularity', 'playlist_genre']
 extactedDF = df[columnsExtract]
 genreCounts = extactedDF['playlist_genre'].value_counts()
+
+st.markdown('## Distribution of genres, song title sentiments and artist genders')
 
 # creating pie chart for genre distribution using plotly
 figGenre = px.pie(genreCounts, values=genreCounts, names=genreCounts.index, title='Distribution of Playlist Genres')
@@ -61,7 +65,54 @@ gendCount = dfCopy["gender"].value_counts()
 figGender = px.pie(gendCount, values = gendCount, names = gendCount.index, title='Distribution of genders across artists')
 st.plotly_chart(figGender)
 
+# Association Rule Mining for Playlist Names
+
+st.markdown('## Association rule mining for playlist names')
+
+# tokenising and creating a list of lists
+playlistNames = df['playlist_name'].str.lower().str.split().tolist()
+
+# one-hot encode the transactions - conversion of categorical information into a format that may be fed into machine learning algorithms to improve prediction accuracy.
+te = TransactionEncoder()
+te_ary = te.fit_transform(playlistNames)
+df_encoded = pd.DataFrame(te_ary, columns=te.columns_)
+
+# using Apriori algorithm to find frequent itemsets
+frequentItemSets = apriori(df_encoded, min_support=0.01, use_colnames=True, max_len=2)
+
+# generate association rules
+rules = association_rules(frequentItemSets, metric="lift", min_threshold=1)
+
+# filter rules based on a threshold for better visualisation
+ruleFiltered = rules[(rules['lift'] > 1) & (rules['confidence'] > 0.5)]
+
+# convert frozensets in 'antecedents' and 'consequents' to string for Plotly compatibility
+ruleFiltered['antecedents'] = ruleFiltered['antecedents'].apply(lambda x: ', '.join(list(x)))
+ruleFiltered['consequents'] = ruleFiltered['consequents'].apply(lambda x: ', '.join(list(x)))
+
+# visualisation with Plotly on scatter graph
+fig = px.scatter(ruleFiltered,
+                 x='support',
+                 y='confidence',
+                 color='lift',
+                 hover_data=['antecedents', 'consequents'],
+                 title='Association Rules of Playlist Names')
+st.plotly_chart(fig)
+
+st.markdown('## Plot description and findings')
+st.markdown("""
+- **Support**: On the x-axis, support indicates how frequently the items in the rule appear together in the dataset. In the context of playlists, a higher support value means that the combination of words from playlist names appears more frequently.
+- **Confidence**: On the y-axis, confidence is a measure of the likelihood that the consequent is found in transactions that contain the antecedent. In simpler terms, if you have a rule like rock -> classic, a higher confidence value means that if a playlist name contains the word "rock," it is very likely to also contain the word "classic." 
+- **Lift**: Represented by the color scale, lift measures how much more often the antecedent and consequent of the rule occur together than we would expect if they were statistically independent. A lift value greater than 1 indicates that the presence of the antecedent increases the likelihood of the consequent occurring in a playlist name.
+
+**Insights**
+- Most rules have a relatively low support, which suggests that most word combinations from playlist names don't appear together very often.
+- The confidence levels vary, with many rules showing high confidence, which means that for those specific word combinations, there is a strong relationship between the words in playlist names.   
+- Lift values vary significantly, with some rules having very high lift values. This implies that for certain rules, the words are much more likely to appear together in a playlist name than by chance alone.        
+""")
+
 # finding relationship between musical characteristics and popularity
+st.markdown('## Relationships between musical characteristics and popularity of songs')
 
 # splitting into four data frames based on popularity
 sevenFifth = df[(df['track_popularity'] >= 75) & (df['track_popularity'] <= 100)]
