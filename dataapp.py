@@ -4,6 +4,8 @@ import gender_guesser.detector as gr
 import plotly.express as px
 import plotly.graph_objs as go
 from textblob import TextBlob
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 st.markdown('# Welcome to the 2020 Spotify music dashboard.')
 data_url = "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv"
@@ -137,3 +139,28 @@ st.markdown("""
 - **Acousticness**: A higher degree of acousticness in the most popular songs suggests a preference for organic, natural sounds.
 - **Energy, Instrumentalness, and Liveness**: Interestingly, songs with lower energy, instrumentalness, and liveness appear to dominate the top popularity bracket. This could point towards a prevailing taste for studio-produced tracks that emphasize vocal performance over instrumental solos or live concert recordings.
 """)
+
+st.markdown('## Word clouds for common words across song titles and artist names:')
+
+# extracting song titles and artist names
+allSongTitles = ' '.join(df['track_name'].fillna('').astype(str))
+allArtistNames = ' '.join(df['track_artist'].fillna('').astype(str))
+
+# generating word clouds
+wordTitles = WordCloud(width=800, height=400, background_color='white').generate(allSongTitles)
+wordArtists = WordCloud(width=800, height=400, background_color='white').generate(allArtistNames)
+
+# displaying word clouds
+fig_title, ax_title = plt.subplots(figsize=(10, 5))  
+wordTitles = WordCloud(width=800, height=400, background_color='white').generate(allSongTitles)
+ax_title.imshow(wordTitles, interpolation='bilinear')
+ax_title.axis('off')
+ax_title.set_title('Word Cloud for Song Titles')
+st.pyplot(fig_title)  
+
+fig_artist, ax_artist = plt.subplots(figsize=(10, 5))  
+wordArtists = WordCloud(width=800, height=400, background_color='white').generate(allArtistNames)
+ax_artist.imshow(wordArtists, interpolation='bilinear')
+ax_artist.axis('off')
+ax_artist.set_title('Word Cloud for Artist Names')
+st.pyplot(fig_artist)  
