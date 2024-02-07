@@ -17,7 +17,7 @@ data_url = "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master
 st.markdown(f'<a href="{data_url}" target="_blank"><button style="color: white; background-color: #FF4B4B; border: None; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">Go to Original Data</button></a>', unsafe_allow_html=True)
 
 # loading dataset and extracting columns of interest
-df = pd.read_csv('spotify_songs.csv')  # make sure the file is in the same directory as your script
+df = pd.read_csv('spotify_songs.csv') 
 
 columnsExtract = ['track_name', 'track_artist', 'track_popularity', 'playlist_genre']
 extactedDF = df[columnsExtract]
