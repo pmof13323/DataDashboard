@@ -6,3 +6,4 @@ textblob
 wordcloud
 matplotlib
 mlxtend
+scikit-learn

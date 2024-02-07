@@ -8,6 +8,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
+from sklearn.feature_extraction.text import CountVectorizer
 
 st.markdown('# Welcome to the 2020 Spotify music dashboard.')
 data_url = "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-01-21/spotify_songs.csv"
@@ -47,6 +48,27 @@ sentimentCount = dfCopy["sentiment"].value_counts()
 # creating pie chart for sentiment analysis using plotly
 figSentiment = px.pie(sentimentCount, values=sentimentCount, names=sentimentCount.index, title='Distribution of Sentiments in Song Titles')
 st.plotly_chart(figSentiment)
+
+# add numerical sentiment score to dfCopy for aggregation
+dfCopy['sentimentScore'] = dfCopy['track_name'].apply(lambda title: TextBlob(str(title)).sentiment.polarity)
+
+# define popularity brackets
+popularity_bins = [0, 25, 50, 75, 100]
+popularity_labels = ['0-25%', '26-50%', '51-75%', '76-100%']
+dfCopy['popularityBracket'] = pd.cut(dfCopy['track_popularity'], bins=popularity_bins, labels=popularity_labels)
+
+# calculate average sentiment score for each genre and popularity bracket
+avgSentiment = dfCopy.groupby(['playlist_genre', 'popularityBracket'])['sentimentScore'].mean().unstack()
+
+# plotting and showing heatmap
+heatmap = px.imshow(
+    avgSentiment,
+    labels=dict(x="Popularity Bracket", y="Genre", color="Average Sentiment"),
+    x=popularity_labels,
+    y=avgSentiment.index,
+    title="Heatmap of Average Sentiment by Genre and Popularity"
+)
+st.plotly_chart(heatmap)
 
 # detecting gender of artist based on their name
 detector = gr.Detector()
@@ -110,6 +132,31 @@ st.markdown("""
 - The confidence levels vary, with many rules showing high confidence, which means that for those specific word combinations, there is a strong relationship between the words in playlist names.   
 - Lift values vary significantly, with some rules having very high lift values. This implies that for certain rules, the words are much more likely to appear together in a playlist name than by chance alone.        
 """)
+
+# N-gram analysis
+
+st.markdown("**Analysis using N-grams:**")
+
+playlistNames = df['playlist_name'].dropna().tolist()
+
+# initialising CountVectorizer with bi-gram configuration
+vectorise = CountVectorizer(ngram_range=(2, 2), stop_words='english')
+
+# fitting vectoriser and transform the playlist names into a bi-gram frequency matrix
+X = vectorise.fit_transform(playlistNames)
+
+# sum up the counts of each bi-gram and convert to a DataFrame
+biGrams = pd.DataFrame(X.sum(axis=0), columns=vectorise.get_feature_names_out()).T
+biGrams.columns = ['Count']
+biGrams = biGrams.sort_values(by='Count', ascending=False).head(20)
+
+# plot the top 20 most frequent bi-grams in a bar graph
+fig = px.bar(biGrams, x=biGrams.index, y='Count', title='Top 20 most frequent bi-grams in playlist names')
+fig.update_layout(xaxis_title='Bi-grams', yaxis_title='Frequency', xaxis={'categoryorder':'total descending'})
+fig.update_traces(marker_color='blue')
+st.plotly_chart(fig)
+
+st.markdown("Results from association rule mining can be compared to the results from an n-gram analysis. showing consistent results, with hip-hop being the most common pairing, followed by hard-rock")
 
 # finding relationship between musical characteristics and popularity
 st.markdown('## Relationships between musical characteristics and popularity of songs')

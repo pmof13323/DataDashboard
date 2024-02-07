@@ -10,7 +10,7 @@ Get a grip on basic NLP concepts like text processing and tokenisation.
 Conduct sentiment analysis on song names to see what emotions are most prevalent in popular music.
 Try out text classification to group songs, potentially by genre or mood.
 Find a relationship between popularity of songs and musical characteristics.
-Learn and apply association rule mining techniques.
+Learn and apply association rule mining and N-gram analysis techniques.
 
 The project is built with Python, using Streamlit for the dashboard.
 
